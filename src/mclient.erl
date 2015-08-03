@@ -25,7 +25,7 @@ start_link() ->
 
 init([]) ->
 
-    {ok, Socket} = gen_udp:open(5000, [binary, {active, false}, {reuseaddr, true},
+    {ok, Socket} = gen_udp:open(5000, [binary, {reuseaddr, true},
                                         {ip, ?Addr}, {add_membership, {?Addr, ?IAddr}}]),
     gen_udp:send(Socket,?Addr,5000,erlang:atom_to_list(node())),
 
@@ -39,6 +39,17 @@ handle_call(_Request, _From, State) ->
 
 handle_cast(_Msg, State) ->
     {noreply, State}.
+
+handle_info({udp,_Socket,{_A,_B,_C,_D},_Port,String}, State) ->
+    error_logger:info_msg("Received via INFO: ~p~n", [String]),
+    case net_adm:ping(erlang:binary_to_atom(String, latin1)) of
+	pong -> 
+		% io:format("~w~n", nodes());
+	    error_logger:info_msg("Node ~p has been attached~n", erlang:binary_to_atom(String, latin1));
+	_ ->
+	    io:format("Oops!~n")
+	end,
+    {noreply, State};
 
 handle_info({nodedown, Nodename}, State)->
     error_logger:info_msg("Node ~p has gone down", Nodename),
