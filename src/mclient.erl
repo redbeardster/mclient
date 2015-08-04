@@ -64,6 +64,7 @@ handle_info({nodeup, Nodename}, State)->
 
 
 terminate(_Reason, _State) ->
+     gen_udp:close(State#state.socket),
     ok.
 
 
