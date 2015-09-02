@@ -63,7 +63,7 @@ handle_info({nodeup, Nodename}, State)->
 
 
 
-terminate(_Reason, _State) ->
+terminate(_Reason, State) ->
      gen_udp:close(State#state.socket),
     ok.
 
